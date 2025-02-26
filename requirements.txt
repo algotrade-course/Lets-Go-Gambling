@@ -1,0 +1,6 @@
+psycopg[binary]
+pandas
+numpy
+matplotlib
+datetime
+json
