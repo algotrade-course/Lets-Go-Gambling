@@ -10,9 +10,9 @@ default = {
     "future_code" : "VN30F1M",
     "order_size" : 1,
     "spread" : 0.2/100,
-    "wait_time" : 720,
-    "START_DATE" : "2024-12-31",
-    "END_DATE" : "2025-01-01",
+    "wait_time" : 3600,
+    "START_DATE" : "2024-12-02",
+    "END_DATE" : "2024-12-09",
 }
 
 def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
@@ -77,6 +77,7 @@ def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
     pnl_over_time = []
 
     for index, row in df.iterrows():
+        position = 0
         timestamp = row["datetime"]
         price = float(row["price"])
 
@@ -84,21 +85,29 @@ def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
         buy_price = price * (1 - spread)
         sell_price = price * (1 + spread)
 
-        # Check for execution of active orders
+        # Check for execution of active orders,  wait for matched
         for order in active_orders[:]:
             order_type, order_price, order_size, order_time = order
             if (order_type == "BUY" and price <= order_price) or (order_type == "SELL" and price >= order_price):
                 if order_type == "BUY":
                     pnl += (price - order_price) * order_size
+                    position += 1
                 else:
                     pnl += (order_price - price) * order_size
+                    position -= 1
                 active_orders.remove(order)
 
-        # Cancel orders if wait time exceeded
-        for order in active_orders:
+        # Cancel orders if wait time exceeded, close positions
+        for order in active_orders[:]:
             order_time = order[3]
             if timestamp - order_time >= timedelta(seconds=wait_time):
                 active_orders.remove(order)
+                if position > 0:
+                    pnl += (price - order[1]) * order_size
+                    position -= 1
+                else:
+                    pnl += (order[1] - price) * order_size
+                    position += 1
 
         # Place new buy/sell orders only if no open positions
         if not active_orders:
