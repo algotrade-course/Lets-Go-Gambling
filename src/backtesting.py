@@ -1,16 +1,18 @@
 from matplotlib import dates
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 from data_accessing import get_db_connection
+from evaluation_metrics import sharpe_ratio, maximum_drawdown
 
 default = {
     "future_code" : "VN30F1M",
     "order_size" : 1,
     "spread" : 0.2/100,
     "wait_time" : 720,
-    "START_DATE" : "2022-01-05",
-    "END_DATE" : "2022-01-08",
+    "START_DATE" : "2024-12-31",
+    "END_DATE" : "2025-01-01",
 }
 
 def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
@@ -57,11 +59,22 @@ def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
     df = pd.DataFrame(result, columns=["datetime", "price"])
     df["datetime"] = pd.to_datetime(df["datetime"])
 
+    # sharp ratio
+    period_returns = df["price"].pct_change().dropna().tolist()
+    risk_free_return = 0
+    sharpe = sharpe_ratio(period_returns, risk_free_return)
+    print(f" Sharpe Ratio: {sharpe:.2f}")
+
+    # Maximum Drawdown
+    max_drawdown = maximum_drawdown(period_returns)
+    print(f" Maximum Drawdown: {max_drawdown:.2f}")
+
     total_trades = 0
     pnl = 0
     active_orders = []  # Track active orders
     buy_orders = []
     sell_orders = []
+    pnl_over_time = []
 
     for index, row in df.iterrows():
         timestamp = row["datetime"]
@@ -72,7 +85,7 @@ def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
         sell_price = price * (1 + spread)
 
         # Check for execution of active orders
-        for order in active_orders:
+        for order in active_orders[:]:
             order_type, order_price, order_size, order_time = order
             if (order_type == "BUY" and price <= order_price) or (order_type == "SELL" and price >= order_price):
                 if order_type == "BUY":
@@ -95,7 +108,10 @@ def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
             sell_orders.append((timestamp, sell_price))
             total_trades += 2
 
+        pnl_over_time.append(pnl)
+
     # Visualization
+    # plot price and orders
     plt.figure(figsize=(12, 6))
     plt.plot(df["datetime"], df["price"], label="Market Price", color="blue")
 
@@ -109,15 +125,25 @@ def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
     plt.xlabel("Date")
     plt.ylabel("Price")
     plt.title(f"Backtest Results for {future_code}")
-
-    # Format X-axis for better readability
-    plt.xticks(rotation=45)  # Rotate for better visibility
-    plt.gca().xaxis.set_major_formatter(dates.DateFormatter('%Y-%m-%d %H:%M'))  # Custom format
-    plt.gca().xaxis.set_major_locator(dates.AutoDateLocator())  # Auto spacing
+    plt.gca().xaxis.set_major_formatter(dates.DateFormatter('%Y-%m-%d %H:%M')) 
+    plt.gca().xaxis.set_major_locator(dates.AutoDateLocator())
 
     plt.legend()
     plt.grid()
-    plt.show()
+    plt.show(block=False)
+    plt.pause(0.1)
+
+    # plot pnl over time
+    plt.figure(figsize=(12, 6))
+    plt.plot(df["datetime"], pnl_over_time, label="PnL", color="green")
+    plt.xlabel("Date")
+    plt.ylabel("PnL")
+    plt.title(f"PnL Over Time for {future_code}")
+    plt.gca().xaxis.set_major_formatter(dates.DateFormatter('%Y-%m-%d %H:%M'))
+    plt.gca().xaxis.set_major_locator(dates.AutoDateLocator())
+    plt.legend()
+    plt.grid()
+    plt.show(block=False)
 
     # Final report
     print(f"\n ### Backtest Complete! ###")
@@ -143,3 +169,4 @@ def data_search(future_code,start_date,end_date):
 if __name__ == "__main__":
     backtest(**default)
     #data_search("VN30F1M","2022-01-01","2022-02-27")
+    input("\nPress Enter to exit...")
