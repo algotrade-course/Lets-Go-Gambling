@@ -10,9 +10,9 @@ default = {
     "future_code" : "VN30F1M",
     "order_size" : 1,
     "spread" : 0.2/100,
-    "wait_time" : 3600,
+    "wait_time" : 1800,
     "START_DATE" : "2024-12-02",
-    "END_DATE" : "2024-12-09",
+    "END_DATE" : "2024-12-03",
 }
 
 def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
@@ -71,13 +71,14 @@ def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
 
     total_trades = 0
     pnl = 0
-    active_orders = []  # Track active orders
+    active_orders = []
+    match_order = []
     buy_orders = []
     sell_orders = []
     pnl_over_time = []
 
     for index, row in df.iterrows():
-        position = 0
+
         timestamp = row["datetime"]
         price = float(row["price"])
 
@@ -85,32 +86,36 @@ def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
         buy_price = price * (1 - spread)
         sell_price = price * (1 + spread)
 
-        # Check for execution of active orders,  wait for matched
+        # Check for execution of active orders, wait for matched
+        executed_orders = []
         for order in active_orders[:]:
             order_type, order_price, order_size, order_time = order
             if (order_type == "BUY" and price <= order_price) or (order_type == "SELL" and price >= order_price):
-                if order_type == "BUY":
-                    pnl += (price - order_price) * order_size
-                    position += 1
-                else:
-                    pnl += (order_price - price) * order_size
-                    position -= 1
-                active_orders.remove(order)
+                if order_type == "BUY" and price <= order_price:
+                    match_order.append((timestamp, "BUY", price, order_size, order_time))
+                elif order_type == "SELL" and price >= order_price:
+                    match_order.append((timestamp, "SELL", price, order_size, order_time))
+                executed_orders.append(order)
+        
+        for order in executed_orders:
+            active_orders.remove(order)
 
-        # Cancel orders if wait time exceeded, close positions
+        # Cancel orders if wait time exceeded
         for order in active_orders[:]:
             order_time = order[3]
             if timestamp - order_time >= timedelta(seconds=wait_time):
                 active_orders.remove(order)
-                if position > 0:
-                    pnl += (price - order[1]) * order_size
-                    position -= 1
-                else:
-                    pnl += (order[1] - price) * order_size
-                    position += 1
 
-        # Place new buy/sell orders only if no open positions
+        # Place new buy/sell orders only if no open waiting positions, close all open positions
         if not active_orders:
+            for order in match_order:
+                match_time, match_type, match_price, match_size, match_order_time = order
+                if match_type == "BUY":
+                    pnl += match_size * (price - match_price)
+                else:
+                    pnl += match_size * (match_price - price)
+            match_order.clear()
+
             active_orders.append(("BUY", buy_price, order_size, timestamp))
             active_orders.append(("SELL", sell_price, order_size, timestamp))
             buy_orders.append((timestamp, buy_price))
