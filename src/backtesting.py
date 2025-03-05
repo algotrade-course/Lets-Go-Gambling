@@ -10,7 +10,7 @@ default = {
     "future_code" : "VN30F1M",
     "order_size" : 1,
     "spread" : 0.2/100,
-    "wait_time" : 1800,
+    "wait_time" : 360,
     "START_DATE" : "2024-12-02",
     "END_DATE" : "2024-12-03",
 }
@@ -70,6 +70,7 @@ def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
     print(f" Maximum Drawdown: {max_drawdown:.2f}")
 
     total_trades = 0
+    match_trades = 0
     pnl = 0
     active_orders = []
     match_order = []
@@ -82,10 +83,6 @@ def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
         timestamp = row["datetime"]
         price = float(row["price"])
 
-        # Calculate buy/sell prices
-        buy_price = price * (1 - spread)
-        sell_price = price * (1 + spread)
-
         # Check for execution of active orders, wait for matched
         executed_orders = []
         for order in active_orders[:]:
@@ -93,8 +90,10 @@ def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
             if (order_type == "BUY" and price <= order_price) or (order_type == "SELL" and price >= order_price):
                 if order_type == "BUY" and price <= order_price:
                     match_order.append((timestamp, "BUY", price, order_size, order_time))
+                    match_trades += 1
                 elif order_type == "SELL" and price >= order_price:
                     match_order.append((timestamp, "SELL", price, order_size, order_time))
+                    match_trades += 1
                 executed_orders.append(order)
         
         for order in executed_orders:
@@ -112,10 +111,16 @@ def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
                 match_time, match_type, match_price, match_size, match_order_time = order
                 if match_type == "BUY":
                     pnl += match_size * (price - match_price)
+                    match_trades += 1
                 else:
                     pnl += match_size * (match_price - price)
+                    match_trades += 1
             match_order.clear()
 
+            # Calculate buy/sell prices
+            buy_price = price * (1 - spread)
+            sell_price = price * (1 + spread)
+            
             active_orders.append(("BUY", buy_price, order_size, timestamp))
             active_orders.append(("SELL", sell_price, order_size, timestamp))
             buy_orders.append((timestamp, buy_price))
@@ -161,26 +166,10 @@ def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
 
     # Final report
     print(f"\n ### Backtest Complete! ###")
-    print(f" Total Trades: {total_trades}")
+    print(f" Total Orders Placed: {total_trades}")
+    print(f" Total Trades: {match_trades}")
     print(f" Net PnL: ${pnl:.2f}")
-
-def data_search(future_code,start_date,end_date):
-    
-    with get_db_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                SELECT tickersymbol 
-                FROM "quote"."futurecontractcode" 
-                WHERE futurecode = %s 
-                AND datetime BETWEEN %s AND %s
-                """, 
-                (future_code, start_date, end_date)
-            )
-            result = cur.fetchall()
-            print(result)
 
 if __name__ == "__main__":
     backtest(**default)
-    #data_search("VN30F1M","2022-01-01","2022-02-27")
     input("\nPress Enter to exit...")
