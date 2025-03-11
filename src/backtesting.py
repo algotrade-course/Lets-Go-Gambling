@@ -5,14 +5,15 @@ import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 from data_accessing import get_db_connection
 from evaluation_metrics import sharpe_ratio, maximum_drawdown
+from helper import fetch_data, report, visualization
 
 default = {
     "future_code" : "VN30F1M",
     "order_size" : 1,
     "spread" : 0.2/100,
-    "wait_time" : 360,
-    "START_DATE" : "2024-12-02",
-    "END_DATE" : "2024-12-03",
+    "wait_time" : 1800,
+    "START_DATE" : "2024-12-01",
+    "END_DATE" : "2024-12-12",
 }
 
 def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
@@ -26,31 +27,9 @@ def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
         return
 
     # Load historical data
-    try:
-        with get_db_connection() as conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    SELECT DISTINCT m.datetime, m.price 
-                    FROM "quote"."matched" AS m
-                    JOIN (
-                        SELECT DISTINCT tickersymbol
-                        FROM "quote"."futurecontractcode"
-                        WHERE futurecode = %s
-                        AND datetime BETWEEN %s AND %s
-                    ) AS f
-                    ON m.tickersymbol = f.tickersymbol
-                    WHERE m.datetime BETWEEN %s AND %s
-                    ORDER BY m.datetime ASC;
-                    """, 
-                    (future_code, start_date, end_date, start_date, end_date)
-                )
-                result = cur.fetchall()
-    except Exception as e:
-        print(f" Error loading historical data: {e}")
-        return
+    result = fetch_data(future_code, start_date, end_date)
 
-    if not result:
+    if result is None:
         print(" No historical data found.")
         return
 
@@ -130,45 +109,10 @@ def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
         pnl_over_time.append(pnl)
 
     # Visualization
-    # plot price and orders
-    plt.figure(figsize=(12, 6))
-    plt.plot(df["datetime"], df["price"], label="Market Price", color="blue")
-
-    if buy_orders:
-        buy_times, buy_prices = zip(*buy_orders)
-        plt.scatter(buy_times, buy_prices, color="green", marker="^", label="Buy Orders")
-    if sell_orders:
-        sell_times, sell_prices = zip(*sell_orders)
-        plt.scatter(sell_times, sell_prices, color="red", marker="v", label="Sell Orders")
-
-    plt.xlabel("Date")
-    plt.ylabel("Price")
-    plt.title(f"Backtest Results for {future_code}")
-    plt.gca().xaxis.set_major_formatter(dates.DateFormatter('%Y-%m-%d %H:%M')) 
-    plt.gca().xaxis.set_major_locator(dates.AutoDateLocator())
-
-    plt.legend()
-    plt.grid()
-    plt.show(block=False)
-    plt.pause(0.1)
-
-    # plot pnl over time
-    plt.figure(figsize=(12, 6))
-    plt.plot(df["datetime"], pnl_over_time, label="PnL", color="green")
-    plt.xlabel("Date")
-    plt.ylabel("PnL")
-    plt.title(f"PnL Over Time for {future_code}")
-    plt.gca().xaxis.set_major_formatter(dates.DateFormatter('%Y-%m-%d %H:%M'))
-    plt.gca().xaxis.set_major_locator(dates.AutoDateLocator())
-    plt.legend()
-    plt.grid()
-    plt.show(block=False)
+    visualization(df, future_code, buy_orders, sell_orders, pnl_over_time)
 
     # Final report
-    print(f"\n ### Backtest Complete! ###")
-    print(f" Total Orders Placed: {total_trades}")
-    print(f" Total Trades: {match_trades}")
-    print(f" Net PnL: ${pnl:.2f}")
+    report(total_trades, match_trades, pnl)
 
 if __name__ == "__main__":
     backtest(**default)
