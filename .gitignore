@@ -1,0 +1,4 @@
+#personal folder for testing stuff
+test/
+#cache
+src/__pycache__/
