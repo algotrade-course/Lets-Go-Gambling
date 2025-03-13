@@ -1,4 +1,4 @@
-#personal folder for testing stuff
-test/
+#personal file for testing stuff
+src/test.py
 #cache
 src/__pycache__/
