@@ -1,119 +1,160 @@
-from matplotlib import dates
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
-from data_accessing import get_db_connection
 from evaluation_metrics import sharpe_ratio, maximum_drawdown
 from helper import fetch_data, report, visualization
 
-default = {
-    "future_code" : "VN30F1M",
-    "order_size" : 1,
-    "spread" : 0.2/100,
-    "wait_time" : 1800,
-    "START_DATE" : "2024-12-01",
-    "END_DATE" : "2024-12-12",
+# Market Making params
+market_making = {
+    "order_size": 1,
+    "spread": 0.2 / 100,
+    "wait_time": 1800,  # in seconds
 }
 
-def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
-    print(f"### Running Backtest for {future_code} from {START_DATE} to {END_DATE}... ###")
+# In-sample and out-of-sample periods
+in_sample_params = {
+    "future_code": "VN30F1M",
+    "START_DATE": "2024-12-01",
+    "END_DATE": "2024-12-12",
+}
 
-    try:
-        start_date = datetime.strptime(START_DATE, "%Y-%m-%d")
-        end_date = datetime.strptime(END_DATE, "%Y-%m-%d")
-    except ValueError:
-        print(" Invalid date format! Use YYYY-MM-DD.")
-        return
+out_sample_params = {
+    "future_code": "VN30F1M",
+    "START_DATE": "2024-11-03",
+    "END_DATE": "2024-11-11",
+}
 
-    # Load historical data
-    result = fetch_data(future_code, start_date, end_date)
+# Fetch historical data
+in_sample_data = fetch_data(
+    in_sample_params["future_code"],
+    in_sample_params["START_DATE"],
+    in_sample_params["END_DATE"]
+)
 
-    if result is None:
-        print(" No historical data found.")
-        return
+out_sample_data = fetch_data(
+    out_sample_params["future_code"],
+    out_sample_params["START_DATE"],
+    out_sample_params["END_DATE"]
+)
 
-    print(f"### Loaded {len(result)} data points for backtesting. ###")
-    # Convert result to DataFrame
-    df = pd.DataFrame(result, columns=["datetime", "price"])
-    df["datetime"] = pd.to_datetime(df["datetime"])
 
-    # sharp ratio
-    period_returns = df["price"].pct_change().dropna().tolist()
-    risk_free_return = 0
-    sharpe = sharpe_ratio(period_returns, risk_free_return)
-    print(f" Sharpe Ratio: {sharpe:.2f}")
+class MarketMaker:
+    def __init__(self, order_size, spread, wait_time, sample_data=None,
+                 future_code="UNKNOWN", START_DATE="N/A", END_DATE="N/A"):
+        self.order_size = order_size
+        self.spread = spread
+        self.wait_time = wait_time
+        self.sample_data = sample_data
+        self.future_code = future_code
+        self.START_DATE = START_DATE
+        self.END_DATE = END_DATE
 
-    # Maximum Drawdown
-    max_drawdown = maximum_drawdown(period_returns)
-    print(f" Maximum Drawdown: {max_drawdown:.2f}")
+    def run(self):
+        print(f"\n### Running MarketMaking for {self.future_code} from {self.START_DATE} to {self.END_DATE}... ###")
 
-    total_trades = 0
-    match_trades = 0
-    pnl = 0
-    active_orders = []
-    match_order = []
-    buy_orders = []
-    sell_orders = []
-    pnl_over_time = []
+        # Validate dates
+        try:
+            start_date = datetime.strptime(self.START_DATE, "%Y-%m-%d")
+            end_date = datetime.strptime(self.END_DATE, "%Y-%m-%d")
+        except ValueError:
+            print(" Invalid date format! Use YYYY-MM-DD.")
+            return
 
-    for index, row in df.iterrows():
+        if not self.sample_data:
+            print(" No historical data found.")
+            return
 
-        timestamp = row["datetime"]
-        price = float(row["price"])
+        print(f"### Loaded {len(self.sample_data)} data points for backtesting. ###")
 
-        # Check for execution of active orders, wait for matched
-        executed_orders = []
-        for order in active_orders[:]:
-            order_type, order_price, order_size, order_time = order
-            if (order_type == "BUY" and price <= order_price) or (order_type == "SELL" and price >= order_price):
-                if order_type == "BUY" and price <= order_price:
-                    match_order.append((timestamp, "BUY", price, order_size, order_time))
-                    match_trades += 1
-                elif order_type == "SELL" and price >= order_price:
-                    match_order.append((timestamp, "SELL", price, order_size, order_time))
-                    match_trades += 1
-                executed_orders.append(order)
-        
-        for order in executed_orders:
-            active_orders.remove(order)
+        # Load into DataFrame
+        self.df = pd.DataFrame(self.sample_data, columns=["datetime", "price"])
+        self.df["datetime"] = pd.to_datetime(self.df["datetime"])
 
-        # Cancel orders if wait time exceeded
-        for order in active_orders[:]:
-            order_time = order[3]
-            if timestamp - order_time >= timedelta(seconds=wait_time):
+        # Evaluation metrics
+        returns = self.df["price"].pct_change().dropna().tolist()
+        self.sharpe = sharpe_ratio(returns, risk_free_return=0)
+        self.max_drawdown = maximum_drawdown(returns)
+
+        print(f" Sharpe Ratio: {self.sharpe:.2f}")
+        print(f" Maximum Drawdown: {self.max_drawdown:.2f}")
+
+        # Simulation state
+        self.total_trades = 0
+        self.match_trades = 0
+        self.pnl = 0
+        self.pnl_over_time = []
+        self.buy_orders = []
+        self.sell_orders = []
+
+        active_orders = []
+        matched_orders = []
+
+        for _, row in self.df.iterrows():
+            timestamp, price = row["datetime"], float(row["price"])
+
+            # Execute matched orders
+            executed = []
+            for order in active_orders:
+                o_type, o_price, o_size, o_time = order
+                if (o_type == "BUY" and price <= o_price) or (o_type == "SELL" and price >= o_price):
+                    matched_orders.append((timestamp, o_type, price, o_size, o_time))
+                    self.match_trades += 1
+                    executed.append(order)
+            for order in executed:
                 active_orders.remove(order)
 
-        # Place new buy/sell orders only if no open waiting positions, close all open positions
-        if not active_orders:
-            for order in match_order:
-                match_time, match_type, match_price, match_size, match_order_time = order
-                if match_type == "BUY":
-                    pnl += match_size * (price - match_price)
-                    match_trades += 1
-                else:
-                    pnl += match_size * (match_price - price)
-                    match_trades += 1
-            match_order.clear()
+            # Cancel stale orders
+            active_orders = [
+                o for o in active_orders
+                if timestamp - o[3] < timedelta(seconds=self.wait_time)
+            ]
 
-            # Calculate buy/sell prices
-            buy_price = price * (1 - spread)
-            sell_price = price * (1 + spread)
-            
-            active_orders.append(("BUY", buy_price, order_size, timestamp))
-            active_orders.append(("SELL", sell_price, order_size, timestamp))
-            buy_orders.append((timestamp, buy_price))
-            sell_orders.append((timestamp, sell_price))
-            total_trades += 2
+            # Place new orders if all matched
+            if not active_orders:
+                for match in matched_orders:
+                    _, m_type, m_price, m_size, _ = match
+                    pnl = m_size * (price - m_price) if m_type == "BUY" else m_size * (m_price - price)
+                    self.pnl += pnl
+                matched_orders.clear()
 
-        pnl_over_time.append(pnl)
+                # Place new buy/sell orders
+                buy_price = price * (1 - self.spread)
+                sell_price = price * (1 + self.spread)
 
-    # Visualization
-    visualization(df, future_code, buy_orders, sell_orders, pnl_over_time)
+                active_orders.append(("BUY", buy_price, self.order_size, timestamp))
+                active_orders.append(("SELL", sell_price, self.order_size, timestamp))
 
-    # Final report
-    report(total_trades, match_trades, pnl)
+                self.buy_orders.append((timestamp, buy_price))
+                self.sell_orders.append((timestamp, sell_price))
+                self.total_trades += 2
+
+            self.pnl_over_time.append(self.pnl)
+
+        return self.get_results()
+
+    def get_results(self):
+        return {
+            "total_trades": self.total_trades,
+            "match_trades": self.match_trades,
+            "pnl": self.pnl,
+            "pnl_over_time": self.pnl_over_time,
+            "sharpe_ratio": self.sharpe,
+            "maximum_drawdown": self.max_drawdown,
+        }
+
+    def full_run(self):
+        self.run()
+        visualization(self.df, self.future_code, self.buy_orders, self.sell_orders, self.pnl_over_time)
+        report(self.total_trades, self.match_trades, self.pnl)
+        return self.get_results()
+
 
 if __name__ == "__main__":
-    backtest(**default)
+    MarketMaker(
+        **market_making,
+        sample_data=in_sample_data,
+        future_code=in_sample_params["future_code"],
+        START_DATE=in_sample_params["START_DATE"],
+        END_DATE=in_sample_params["END_DATE"]
+    ).full_run()
+
     input("\nPress Enter to exit...")
