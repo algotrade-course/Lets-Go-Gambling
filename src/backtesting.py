@@ -12,8 +12,8 @@ default = {
     "order_size" : 1,
     "spread" : 0.2/100,
     "wait_time" : 1800,
-    "START_DATE" : "2024-12-01",
-    "END_DATE" : "2024-12-12",
+    "START_DATE" : "2021-01-01",
+    "END_DATE" : "2024-03-01",
 }
 
 def backtest(future_code, order_size, spread, wait_time, START_DATE, END_DATE):
