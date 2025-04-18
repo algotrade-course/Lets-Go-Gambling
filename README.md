@@ -18,7 +18,7 @@ Despite the simplicity of Market Making as a trading strategy, determining the o
 
 > **How can we find the optimal set of Market Making parameters that maximize profit and minimize risk on the VN30F1M futures market?**
 
-### Method
+#### Method
 
 To solve this problem, we try to implemented a `MarketMaker` algorithm that accepts tunable parameters:
 
@@ -28,7 +28,7 @@ To solve this problem, we try to implemented a `MarketMaker` algorithm that acce
 
 We used **Optuna** get the best parameters for in-sample-data
 
-### Results
+#### Results
 
 - For the **in-sample data**, the strategy produced a **positive PnL**.
 - However, for the **out-of-sample data**, the strategy still result in a **negative PnL**.
