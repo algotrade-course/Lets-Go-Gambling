@@ -7,13 +7,31 @@ This templte project sturcture also specifies how to store and structure the sou
 This `README.md` file serves as an example how a this will look like in a standard Plutus project. Below listed out the sample section.
 
 ## Abstract
-- Summarize the project: motivation, methods, findings, etc. 
+- Summarize the project: motivation, methods, findings, etc.
+- This project is for ALGOTRADE course, we use a simple Market Making stratergy and apply the first 7 steps in Algotrade. We found out that even after optimizing, the simple method is not good enough for the real market
 
 ## Introduction
-- Briefly introduce the project.
-- Problem statement, research question or the hypothesis.
-- Method(s) to solve the problem
-- What are the results?
+
+In this project, we aim to develop and optimize a **Market Making strategy** using historical trading data from the **VN30F1M futures market**. Market Making is a common algorithmic trading strategy that involves continuously quoting buy and sell prices to profit from the bid-ask spread.
+
+Despite the simplicity of Market Making as a trading strategy, determining the optimal configuration for parameters such as **spread size**, **order volume**, and **timing intervals** is hard. Bad parameters can lead to poor performance, high inventory risk, and potential losses. The key problem, therefore, is:
+
+> **How can we find the optimal set of Market Making parameters that maximize profit and minimize risk on the VN30F1M futures market?**
+
+### Method
+
+To solve this problem, we try to implemented a `MarketMaker` algorithm that accepts tunable parameters:
+
+- `spread`: the distance from the mid-price at which to place quotes  
+- `order_size`: the volume of each order  
+- `wait_time`: the time interval between order refreshes
+
+We used **Optuna** get the best parameters for in-sample-data
+
+### Results
+
+- For the **in-sample data**, the strategy produced a **positive PnL**.
+- However, for the **out-of-sample data**, the strategy still result in a **negative PnL**.
 
 ## Related Work (or Background)
 - Prerequisite reading if the audience needs knowledge before exploring the project.
@@ -24,11 +42,26 @@ This `README.md` file serves as an example how a this will look like in a standa
 - Step 1 of the Nine-Step
 
 ## Data
-- Data source
-- Data type
-- Data period
-- How to get the input data?
+- Data source - algotradeDB
+- Data type - 
+- Data period:
+in_sample = {
+    "START_DATE": "2024-12-01",
+    "END_DATE": "2024-12-12",
+}
+
+out_sample = {
+    "START_DATE": "2024-11-03",
+    "END_DATE": "2024-11-11",
+}
+- How to get the input data? 
+- In Src/backtesting, there are parameters that you can adjust
+- in_sample_params: for getting in_sample_data
+- out_sample_params: for getting out_sample_data
+- market_making: for running MarketMaker within backtesting.py itself, this shouldn't affect optimization
 - How to store the output data?
+- i don't actually store them yet, i just print them out
+
 ### Data collection
 - Step 2 of the Nine-Step
 ### Data Processing
