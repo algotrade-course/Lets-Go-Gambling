@@ -83,7 +83,7 @@ def collect_data_from_csv(start_date, end_date, filename="data.csv"):
     
 if __name__ == "__main__":
     print("### Fetching Data... ###")
-    data = fetch_data("VN30F1M", "2024-01-01", "2025-01-03")
+    data = fetch_data("VN30F1M", "2025-01-01", "2025-01-03")
     if data:
         print(f"writing to data.csv")
         with open("data.csv", "w", newline="") as csvfile:
