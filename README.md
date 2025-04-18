@@ -44,16 +44,7 @@ We used **Optuna** get the best parameters for in-sample-data
 ## Data
 - Data source - algotradeDB
 - Data type - 
-- Data period:
-in_sample = {
-    "START_DATE": "2024-12-01",
-    "END_DATE": "2024-12-12",
-}
-
-out_sample = {
-    "START_DATE": "2024-11-03",
-    "END_DATE": "2024-11-11",
-}
+- Data period
 - How to get the input data? 
 - In Src/backtesting, there are parameters that you can adjust
 - in_sample_params: for getting in_sample_data
