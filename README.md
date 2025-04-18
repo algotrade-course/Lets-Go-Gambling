@@ -32,6 +32,7 @@ We used **Optuna** get the best parameters for in-sample-data
 
 - For the **in-sample data**, the strategy produced a **positive PnL**.
 - However, for the **out-of-sample data**, the strategy still result in a **negative PnL**.
+- The current parameters still cannot handle a rising or falling market well
 
 ## Related Work (or Background)
 - Prerequisite reading if the audience needs knowledge before exploring the project.
