@@ -60,12 +60,27 @@ We used **Optuna** get the best parameters for in-sample-data
 - Step 3 of the Nine-Step
 
 ## Implementation
-- Briefly describe the implemetation.
-    - How to set up the enviroment to run the source code and required steps to replicate the results
-    - Discuss the concrete implementation if there are any essential details
-    - How to run each step from `In-sample Backtesting`, Step 4 to `Out-of-sample Backtesting`, Step 6 (or `Paper Trading`, Step 7).
-    - How to change the algorithm configurations for different run.
-- Most important section and need the most details to correctly replicate the results.
+### Environment Setup
+1. Set up python virtual environment
+```bash
+python -m venv venv
+source venv/bin/activate # for Linux/MacOS
+.\venv\Scripts\activate.bat # for Windows command line
+.\venv\Scripts\Activate.ps1 # for Windows PowerShell
+```
+2. Install the required packages
+```bash
+pip install -r requirements.txt
+```
+3. (OPTIONAL) Create `.env` file in the root directory of the project and fill in the required information. The `.env` file is used to store environment variables that are used in the project. The following is an example of a `.env` file:
+```env
+DB_NAME=<database name>
+DB_USER=<database user name>
+DB_PASSWORD=<database password>
+DB_HOST=<host name or IP address>
+DB_PORT=<database port>
+```
+**Note:** Skip this step if you decide to use the provided data files on Google Drive (option 1).
 
 ## In-sample Backtesting
 - Describe the In-sample Backtesting step

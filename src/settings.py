@@ -1,4 +1,4 @@
-from src.helper import fetch_data
+from src.data_accessing import collect_data_from_csv
 
 # Market Making params
 pre_optimization_params = {
@@ -26,14 +26,13 @@ out_sample_params = {
     "END_DATE": "2024-11-11",
 }
 
-# Fetch historical data
-in_sample_data = fetch_data(
+in_sample_data = collect_data_from_csv(
     in_sample_params["future_code"],
     in_sample_params["START_DATE"],
     in_sample_params["END_DATE"]
 )
 
-out_sample_data = fetch_data(
+out_sample_data = collect_data_from_csv(
     out_sample_params["future_code"],
     out_sample_params["START_DATE"],
     out_sample_params["END_DATE"]

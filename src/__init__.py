@@ -1,4 +1,4 @@
-from .backtesting import *
+from .backtest import *
 from .optimization import *
 from .out_sample_testing import *
 from .settings import *

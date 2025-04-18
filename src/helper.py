@@ -1,5 +1,4 @@
 from matplotlib import dates, pyplot as plt
-from src.data_accessing import get_db_connection
 
 def visualization(df, future_code, buy_orders, sell_orders, pnl_over_time):
     plt.figure(figsize=(12, 6))
@@ -40,28 +39,3 @@ def report(total_trades, match_trades, pnl):
     print(f" Total Orders Placed: {total_trades}")
     print(f" Total Trades: {match_trades}")
     print(f" Net PnL: {100000*pnl:.2f} đồng")
-
-def fetch_data(future_code, start_date, end_date):
-    try:
-        with get_db_connection() as conn:
-            with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    SELECT DISTINCT m.datetime, m.price 
-                    FROM "quote"."matched" AS m
-                    JOIN (
-                        SELECT DISTINCT tickersymbol
-                        FROM "quote"."futurecontractcode"
-                        WHERE futurecode = %s
-                        AND datetime BETWEEN %s AND %s
-                    ) AS f
-                    ON m.tickersymbol = f.tickersymbol
-                    WHERE m.datetime BETWEEN %s AND %s
-                    ORDER BY m.datetime ASC;
-                    """, 
-                    (future_code, start_date, end_date, start_date, end_date)
-                )
-                return cur.fetchall()
-    except Exception as e:
-        print(f" Error loading historical data: {e}")
-        return None

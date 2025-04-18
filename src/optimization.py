@@ -1,4 +1,4 @@
-from src.backtesting import MarketMaker
+from src.backtest import MarketMaker
 import optuna
 from optuna.samplers import TPESampler
 from src.settings import *

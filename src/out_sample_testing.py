@@ -1,4 +1,4 @@
-from src.backtesting import MarketMaker
+from src.backtest import MarketMaker
 from src.settings import *
 
 if __name__ == "__main__":
