@@ -8,6 +8,7 @@ load_dotenv()
 
 def get_db_connection():
     try:
+        print("Connecting to database...")
         return psycopg.connect(
             host=os.getenv("DB_HOST"),
             port=os.getenv("DB_PORT"),
@@ -23,6 +24,7 @@ def get_db_connection():
 def fetch_data(future_code, start_date, end_date):
     try:
         with get_db_connection() as conn:
+            print("Connected to database.")
             with conn.cursor() as cur:
                 cur.execute(
                     """
@@ -81,8 +83,9 @@ def collect_data_from_csv(start_date, end_date, filename="data.csv"):
     
 if __name__ == "__main__":
     print("### Fetching Data... ###")
-    data = fetch_data("VN30F1M", "2022-01-01", "2024-01-03")
+    data = fetch_data("VN30F1M", "2024-01-01", "2025-01-03")
     if data:
+        print(f"writing to data.csv")
         with open("data.csv", "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(["datetime", "price", "tickersymbol", "futurecontractcode"])
