@@ -17,7 +17,7 @@ def get_db_connection():
         print(f" Error connecting to database: {e}")
         return None
 
-
+# should i clean these up?
 def get_futurecontract_tickersymbol(future_contract_code, date=None):
     try:
         with get_db_connection() as conn:

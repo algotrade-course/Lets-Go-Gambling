@@ -1,41 +1,8 @@
 import pandas as pd
 from datetime import datetime, timedelta
-from evaluation_metrics import sharpe_ratio, maximum_drawdown
-from helper import fetch_data, report, visualization
-
-# Market Making params
-market_making = {
-    "order_size": 1,
-    "spread": 0.2 / 100,
-    "wait_time": 1800,  # in seconds
-}
-
-# In-sample and out-of-sample periods
-in_sample_params = {
-    "future_code": "VN30F1M",
-    "START_DATE": "2024-12-01",
-    "END_DATE": "2024-12-12",
-}
-
-out_sample_params = {
-    "future_code": "VN30F1M",
-    "START_DATE": "2024-11-03",
-    "END_DATE": "2024-11-11",
-}
-
-# Fetch historical data
-in_sample_data = fetch_data(
-    in_sample_params["future_code"],
-    in_sample_params["START_DATE"],
-    in_sample_params["END_DATE"]
-)
-
-out_sample_data = fetch_data(
-    out_sample_params["future_code"],
-    out_sample_params["START_DATE"],
-    out_sample_params["END_DATE"]
-)
-
+from src.evaluation_metrics import sharpe_ratio, maximum_drawdown
+from src.helper import report, visualization
+from src.settings import pre_optimization_params, in_sample_data, in_sample_params
 
 class MarketMaker:
     def __init__(self, order_size, spread, wait_time, sample_data=None,
@@ -150,7 +117,7 @@ class MarketMaker:
 
 if __name__ == "__main__":
     MarketMaker(
-        **market_making,
+        **pre_optimization_params,
         sample_data=in_sample_data,
         future_code=in_sample_params["future_code"],
         START_DATE=in_sample_params["START_DATE"],

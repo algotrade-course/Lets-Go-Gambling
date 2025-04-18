@@ -1,5 +1,5 @@
 from matplotlib import dates, pyplot as plt
-from data_accessing import get_db_connection
+from src.data_accessing import get_db_connection
 
 def visualization(df, future_code, buy_orders, sell_orders, pnl_over_time):
     plt.figure(figsize=(12, 6))

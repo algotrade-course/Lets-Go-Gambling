@@ -1,10 +1,10 @@
-from backtesting import MarketMaker, in_sample_params, out_sample_params, out_sample_data, in_sample_data
+from src.backtesting import MarketMaker
 import optuna
 from optuna.samplers import TPESampler
-
+from src.settings import *
 
 def optuna_objective(trial):
-    spread = trial.suggest_float("spread", 0.00001, 0.02, step=0.00001)
+    spread = trial.suggest_float("spread", 0.00001, 0.0002, step=0.00001)
     order_size = trial.suggest_int("order_size", 1, 10)
     wait_time = trial.suggest_int("wait_time", 60, 7200)
 
@@ -44,13 +44,11 @@ if __name__ == "__main__":
     for key, value in best_trial.params.items():
         print(f"    {key}: {value}")
 
-    # Run the algorithm with the best parameter sets through the out-sample period
-    print("\n### Running on Out-of-Sample Data... ###")
-    out_sample_model = MarketMaker(
-        sample_data=out_sample_data,
-        **out_sample_params,
-        **best_trial.params
-    )
-    out_sample_results = out_sample_model.full_run()
+    # Saving the post optimization params
+    post_optimized_params = {
+        "order_size": best_trial.params["order_size"],
+        "spread": best_trial.params["spread"],
+        "wait_time": best_trial.params["wait_time"],
+    }
 
     input("\nPress Enter to exit...")

@@ -52,11 +52,17 @@ This `README.md` file serves as an example how a this will look like in a standa
 - Has link to the In-sample Backtesting Report
 
 ## Optimization
-- Describe the Optimization step
-    - Optimization process/methods/library
-    - Parameters to optimize
-    - Hyper-parameter of the optimize process
-- Step 5 of the Nine-Step
+- Library: Optuna
+- Sampler: `TPESampler`
+- Number of trials: 5000
+- Optimization objective: 
+```math
+  0.8 \cdot \text{SR\_score} + 0.2 \cdot \text{MDD\_score}
+```
+Where:
+  - `sharpe` varies from 0 to 1 as SR varies from 0 to 3.0.
+  - `MDD_score` varies from 0 to 1 as MDD varies from -20% to -5%.
+  - Check out [optimize.py](src/optimize.py) for more details.
 ### Optimization Result
 - Brieftly shown the result: table, image, etc.
 - Has link to the Optimization Report
