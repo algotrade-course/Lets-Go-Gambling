@@ -2,7 +2,8 @@ import pandas as pd
 from datetime import datetime, timedelta
 from src.evaluation_metrics import sharpe_ratio, maximum_drawdown
 from src.helper import report, visualization
-from src.settings import pre_optimization_params, in_sample_data, in_sample_params
+from src.settings import *
+import sys
 
 class MarketMaker:
     def __init__(self, order_size, spread, wait_time, sample_data=None,
@@ -14,17 +15,10 @@ class MarketMaker:
         self.future_code = future_code
         self.START_DATE = START_DATE
         self.END_DATE = END_DATE
+        self.df = None
 
     def run(self):
         print(f"\n### Running MarketMaking for {self.future_code} from {self.START_DATE} to {self.END_DATE}... ###")
-
-        # Validate dates
-        try:
-            start_date = datetime.strptime(self.START_DATE, "%Y-%m-%d")
-            end_date = datetime.strptime(self.END_DATE, "%Y-%m-%d")
-        except ValueError:
-            print(" Invalid date format! Use YYYY-MM-DD.")
-            return
 
         if not self.sample_data:
             print(" No historical data found.")
@@ -44,7 +38,6 @@ class MarketMaker:
         print(f" Sharpe Ratio: {self.sharpe:.2f}")
         print(f" Maximum Drawdown: {self.max_drawdown:.2f}")
 
-        # Simulation state
         self.total_trades = 0
         self.match_trades = 0
         self.pnl = 0
@@ -110,18 +103,41 @@ class MarketMaker:
 
     def full_run(self):
         self.run()
+        if self.df is None or self.df.empty:
+            return
         visualization(self.df, self.future_code, self.buy_orders, self.sell_orders, self.pnl_over_time)
         report(self.total_trades, self.match_trades, self.pnl)
         return self.get_results()
 
 
 if __name__ == "__main__":
-    MarketMaker(
-        **pre_optimization_params,
-        sample_data=in_sample_data,
-        future_code=in_sample_params["future_code"],
-        START_DATE=in_sample_params["START_DATE"],
-        END_DATE=in_sample_params["END_DATE"]
-    ).full_run()
+    if len(sys.argv) < 2:
+        print("Please specify a mode: 'in' or 'out'")
+        sys.exit(1)
+
+    mode = sys.argv[1].lower()
+
+    if mode == "in":
+        print("\n### Running on In-Sample Data... ###")
+        MarketMaker(
+            **pre_optimization_params,
+            sample_data=in_sample_data,
+            future_code=in_sample_params["future_code"],
+            START_DATE=in_sample_params["START_DATE"],
+            END_DATE=in_sample_params["END_DATE"]
+        ).full_run()
+
+    elif mode == "out":
+        print("\n### Running on Out-of-Sample Data... ###")
+        out_sample_model = MarketMaker(
+            **post_optimized_params,
+            sample_data=out_sample_data,
+            **out_sample_params
+        )
+        out_sample_model.full_run()
+
+    else:
+        print("Invalid mode. Use 'in' or 'out'.")
+        sys.exit(1)
 
     input("\nPress Enter to exit...")

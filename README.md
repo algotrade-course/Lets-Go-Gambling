@@ -83,22 +83,26 @@ DB_PORT=<database port>
 **Note:** Skip this step if you decide to use the provided data files on Google Drive (option 1).
 
 ## In-sample Backtesting
+Run this command to start the in-sample backtesting process.
+```bash
+python -m src.backtest in
+```
 - Describe the In-sample Backtesting step
     - Parameters
     - Data
-- Step 4 of the Nine-Step
 ### In-sample Backtesting Result
 - Brieftly shown the result: table, image, etc.
 - Has link to the In-sample Backtesting Report
 
 ## Optimization
+```bash
+python -m src.optimization
+```
 - Library: Optuna
 - Sampler: `TPESampler`
-- Number of trials: 5000
+- Number of trials: 100
 - Optimization objective: 
-```math
-  0.8 \cdot \text{SR\_score} + 0.2 \cdot \text{MDD\_score}
-```
+Profit and loss
 Where:
   - `sharpe` varies from 0 to 1 as SR varies from 0 to 3.0.
   - `MDD_score` varies from 0 to 1 as MDD varies from -20% to -5%.
@@ -108,8 +112,26 @@ Where:
 - Has link to the Optimization Report
 
 ## Out-of-sample Backtesting
-- Describe the Out-of-sample Backtesting step
-    - Parameter
+Run this command to start the out-sample backtesting process.
+```bash
+python -m src.backtest out
+```
+```json
+parameters:
+post_optimized_params = {
+    "order_size": 1,
+    "spread": 0.0001,
+    "wait_time": 1800,  # in seconds
+}
+
+out_sample_params = { # this could be adjusted to not be requried for this phase later
+    "future_code": "VN30F1M",
+    "START_DATE": "2024-11-03",
+    "END_DATE": "2024-11-11",
+}
+
+out_sample_data this one is auto collect base on out_sample_params
+```
     - Data
 - Step 6 of th Nine-Step
 ### Out-of-sample Backtesting Reuslt

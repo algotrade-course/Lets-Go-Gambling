@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     # Optimize objective function
     print("### Starting hyperparameter optimization... ###")
-    study.optimize(optuna_objective, n_trials=15, show_progress_bar=True)
+    study.optimize(optuna_objective, n_trials=100, show_progress_bar=True)
 
     # Show best trial results
     best_trial = study.best_trial

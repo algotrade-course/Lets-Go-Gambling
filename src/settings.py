@@ -13,7 +13,7 @@ post_optimized_params = {
     "wait_time": 1800,  # in seconds
 }
 
-# In-sample and out-of-sample periods
+# In-sample and out-of-sample periods (remember to adjust limit if you use csv)
 in_sample_params = {
     "future_code": "VN30F1M",
     "START_DATE": "2024-12-01",
