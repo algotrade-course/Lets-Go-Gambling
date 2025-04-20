@@ -42,10 +42,6 @@ We used **Optuna** get the best parameters for in-sample-data
 - Step 1 of the Nine-Step
 
 ## Data
-First clone the project
-```bash
-git clone https://github.com/algotrade-course/Lets-Go-Gambling.git
-```
 - Data source: Algotrade internship database
 - Data type: CSV
 - Data period: 2024-11-01 to 2024-11-30 (follow "data_params" within settings.py)
@@ -66,6 +62,10 @@ python src.data get
 python src.data process
 ```
 ## Implementation
+First clone the project
+```bash
+git clone https://github.com/algotrade-course/Lets-Go-Gambling.git
+```
 ### Environment Setup
 1. Set up python virtual environment
 ```bash
