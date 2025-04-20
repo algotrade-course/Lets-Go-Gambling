@@ -38,8 +38,7 @@ We used **Optuna** get the best parameters for in-sample-data
 - Optional
 
 ## Trading (Algorithm) Hypotheses
-- Describe the Trading Hypotheses
-- Step 1 of the Nine-Step
+By applying the Market Making strategy in the VN30F1M futures market with a spread of x, this strategy can achieve stable profits by taking advantage of small price discrepancies, while maintaining a neutral position with low risk. The Market Maker will provide liquidity to the market and earn profits throughout the trading period, without being significantly affected by short-term price fluctuations or strong volatility.
 ## Implementation
 First clone the project
 ```bash
