@@ -24,13 +24,14 @@ This `README.md` file serves as an example how a this will look like in a standa
 - Step 1 of the Nine-Step
 
 ## Data
-- Data source
-- Data type
-- Data period
-- How to get the input data?
+- Data source: Algotrade internship database, VCBF, VCI using Vnstock library
+- Data type: CSV
+- Data period: 2021-01-01 to 2022-01-01
+- The input data is store in `src/ticker_data2021-01-01_2022-01-01.csv`
 - How to store the output data?
 ### Data collection
-- Step 2 of the Nine-Step
+- The daily price and quantity of Vietnamese stocks are collected from Algotrade internship database using SQL queries.
+- The data is store in `src/ticker_data2021-01-01_2022-01-01.csv`
 ### Data Processing
 - Step 3 of the Nine-Step
 
