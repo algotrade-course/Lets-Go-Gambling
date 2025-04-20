@@ -1,8 +1,11 @@
 import pandas as pd
-from datetime import datetime, timedelta
+import json
+from datetime import timedelta
 from src.evaluation_metrics import sharpe_ratio, maximum_drawdown
 from src.helper import report, visualization
-from src.settings import *
+from src.settings import in_sample_params, out_sample_params, pre_optimization_params
+from src.data import in_sample_data_path, out_sample_data_path
+from src.path import optimize_result
 import sys
 
 class MarketMaker:
@@ -119,18 +122,19 @@ if __name__ == "__main__":
 
     if mode == "in":
         print("\n### Running on In-Sample Data... ###")
+        in_sample_data = pd.read_csv(in_sample_data_path).values.tolist()
         MarketMaker(
             **pre_optimization_params,
             sample_data=in_sample_data,
-            future_code=in_sample_params["future_code"],
-            START_DATE=in_sample_params["START_DATE"],
-            END_DATE=in_sample_params["END_DATE"]
+            **in_sample_params
         ).full_run()
 
     elif mode == "out":
         print("\n### Running on Out-of-Sample Data... ###")
+        optimize_params = json.load(open(optimize_result, "r"))
+        out_sample_data = pd.read_csv(out_sample_data_path).values.tolist()
         out_sample_model = MarketMaker(
-            **post_optimized_params,
+            **optimize_params,
             sample_data=out_sample_data,
             **out_sample_params
         )

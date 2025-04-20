@@ -7,7 +7,6 @@ This templte project sturcture also specifies how to store and structure the sou
 This `README.md` file serves as an example how a this will look like in a standard Plutus project. Below listed out the sample section.
 
 ## Abstract
-- Summarize the project: motivation, methods, findings, etc.
 - This project is for ALGOTRADE course, we use a simple Market Making stratergy and apply the first 7 steps in Algotrade. We found out that even after optimizing, the simple method is not good enough for the real market
 
 ## Introduction
@@ -43,23 +42,30 @@ We used **Optuna** get the best parameters for in-sample-data
 - Step 1 of the Nine-Step
 
 ## Data
-- Data source - algotradeDB
-- Data type - 
-- Data period
-- How to get the input data? 
-- In Src/backtesting, there are parameters that you can adjust
-- in_sample_params: for getting in_sample_data
-- out_sample_params: for getting out_sample_data
-- market_making: for running MarketMaker within backtesting.py itself, this shouldn't affect optimization
-- How to store the output data?
-- i don't actually store them yet, i just print them out
+- Data source: Algotrade internship database
+- Data type: CSV
+- Data period: 2024-11-01 to 2024-11-30 (follow "data_params" within settings.py)
+- The input data is store in `<DATA_PATH_ROOT>/data.csv` (**DATA_PATH_ROOT** in settings.py)
 
+(Optional) you can get your own data if you have your database setup in .env, in step 3 of **Implementation - Environment Setup** below
+```bash
+python src.data get
+```
 ### Data collection
-- Step 2 of the Nine-Step
+- Data source: Algotrade internship database
+- Data type: CSV
+- Data period: 2024-11-01 to 2024-11-30 (follow **data_params** within settings.py)
+- The input data is store in `<DATA_PATH_ROOT>/data.csv`
 ### Data Processing
-- Step 3 of the Nine-Step
-
+- This will collect data from data.csv according to **in_sample_params** and **out_sample_params** in settings.py. it will then write to `<DATA_PATH_ROOT>/in_sample_data.csv` and `<DATA_PATH_ROOT>/out_sample_data.csv`
+```bash
+python src.data process
+```
 ## Implementation
+First clone the project
+```bash
+git clone https://github.com/algotrade-course/Lets-Go-Gambling.git
+```
 ### Environment Setup
 1. Set up python virtual environment
 ```bash
@@ -80,64 +86,64 @@ DB_PASSWORD=<database password>
 DB_HOST=<host name or IP address>
 DB_PORT=<database port>
 ```
-**Note:** Skip this step if you decide to use the provided data files on Google Drive (option 1).
+**Note:** Skip this step if you decide to use the provided `data.csv`.
 
 ## In-sample Backtesting
-Run this command to start the in-sample backtesting process.
+### Parameters
+
+| Parameter     | Description                   | Default Value    |
+|---------------|-------------------------------|------------------|
+| `future_code` | Code for the futures contract | `VN30F1M`        |
+| `START_DATE`  | Start of the date range       | `2024-11-01`     |
+| `END_DATE`    | End of the date range         | `2024-11-06`     |
+
+Run this command to start the in-sample backtesting process:
+### Run command
 ```bash
 python -m src.backtest in
 ```
-- Describe the In-sample Backtesting step
-    - Parameters
-    - Data
+### Data
+- It should be in `<DATA_PATH_ROOT>/in_sample_data.csv` after you process the data
 ### In-sample Backtesting Result
 - Brieftly shown the result: table, image, etc.
 - Has link to the In-sample Backtesting Report
-
+![](images/in_sample_result.png)
+![](images/in_sample_pnl.png)
 ## Optimization
 ```bash
-python -m src.optimization
+python -m src.optimize
 ```
 - Library: Optuna
 - Sampler: `TPESampler`
 - Number of trials: 100
-- Optimization objective: 
-Profit and loss
-Where:
-  - `sharpe` varies from 0 to 1 as SR varies from 0 to 3.0.
-  - `MDD_score` varies from 0 to 1 as MDD varies from -20% to -5%.
-  - Check out [optimize.py](src/optimize.py) for more details.
+- Optimization objective: Profit and loss
+- Check out [optimize.py](src/optimize.py) for more details.
 ### Optimization Result
-- Brieftly shown the result: table, image, etc.
-- Has link to the Optimization Report
+![](images/optimize_result.png)
+
+You can see [Trials](data/optuna_trials.csv) in `<DATA_PATH_ROOT>/optimize_result.csv`
 
 ## Out-of-sample Backtesting
-Run this command to start the out-sample backtesting process.
+### Parameters
+
+| Parameter     | Description                   | Default Value    |
+|---------------|-------------------------------|------------------|
+| `future_code` | Code for the futures contract | `VN30F1M`        |
+| `START_DATE`  | Start of the date range       | `2024-11-09`     |
+| `END_DATE`    | End of the date range         | `2024-11-16`     |
+
+Run this command to start the in-sample backtesting process:
+### Run command
 ```bash
 python -m src.backtest out
 ```
-```json
-parameters:
-post_optimized_params = {
-    "order_size": 1,
-    "spread": 0.0001,
-    "wait_time": 1800,  # in seconds
-}
-
-out_sample_params = { # this could be adjusted to not be requried for this phase later
-    "future_code": "VN30F1M",
-    "START_DATE": "2024-11-03",
-    "END_DATE": "2024-11-11",
-}
-
-out_sample_data this one is auto collect base on out_sample_params
-```
-    - Data
-- Step 6 of th Nine-Step
+### Data
+- It should be in `<DATA_PATH_ROOT>/out_sample_data.csv` after you process the data
 ### Out-of-sample Backtesting Reuslt
 - Brieftly shown the result: table, image, etc.
 - Has link to the Out-of-sample Backtesting Report
-
+![](images/out_sample_result.png)
+![](images/out_sample_pnl.png)
 ## Paper Trading
 - Describe the Paper Trading step
 - Step 7 of the Nine-Step
@@ -148,11 +154,10 @@ out_sample_data this one is auto collect base on out_sample_params
 
 
 ## Conclusion
-- What is the conclusion?
-- Optional
+- We still cannot handle rising all falling market well with the current parameters
 
 ## Reference
-- All the reference goes here.
+- [Market Making](https://hub.algotrade.vn/knowledge-hub/market-making-strategy/)
 
 ## Other information
 - Link to the Final Report (Paper) should be somewhere in the `README.md` file.

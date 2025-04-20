@@ -4,4 +4,7 @@ __pycache__/
 .vscode/
 *.pyc
 .env
-data.csv
+data/in_sample_data.csv
+data/out_sample_data.csv
+data/optuna_result.json
+data/optuna_trials.csv
