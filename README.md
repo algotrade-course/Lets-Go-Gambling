@@ -74,7 +74,7 @@ DB_PORT=<database port>
 
 (Optional) you can get your own data if you have your database setup in .env, in step 3 of **Implementation - Environment Setup** below
 ```bash
-python src.data get
+python -m src.data get
 ```
 ### Data collection
 - Data source: Algotrade internship database
@@ -84,7 +84,7 @@ python src.data get
 ### Data Processing
 - This will collect data from data.csv according to **in_sample_params** and **out_sample_params** in settings.py. it will then write to `<DATA_PATH_ROOT>/in_sample_data.csv` and `<DATA_PATH_ROOT>/out_sample_data.csv`
 ```bash
-python src.data process
+python -m src.data process
 ```
 
 ## In-sample Backtesting
