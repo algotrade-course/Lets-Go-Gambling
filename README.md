@@ -43,6 +43,7 @@ By applying the Market Making strategy in the VN30F1M futures market with a spre
 First clone the project
 ```bash
 git clone https://github.com/algotrade-course/Lets-Go-Gambling.git
+cd Lets-Go-Gambling
 ```
 ### Environment Setup
 1. Set up python virtual environment
