@@ -120,7 +120,7 @@ python -m src.optimize
 ### Optimization Result
 ![](images/optimize_result.png)
 
-You can see [Trials](data/optuna_trials.csv) in `<DATA_PATH_ROOT>/optimize_result.csv`
+You can see [Trials](data/optuna_trials.csv) in `<DATA_PATH_ROOT>/optuna_trials.csv`
 
 ## Out-of-sample Backtesting
 ### Parameters
