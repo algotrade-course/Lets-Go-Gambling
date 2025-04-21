@@ -40,7 +40,7 @@ if __name__ == "__main__":
 
     # Optimize objective function
     print("### Starting hyperparameter optimization... ###")
-    study.optimize(optuna_objective, n_trials=5, show_progress_bar=True)
+    study.optimize(optuna_objective, n_trials=100, show_progress_bar=True)
     study.trials_dataframe().to_csv(optimize_trials, index=False)
 
     # Show best trial results
