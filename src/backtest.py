@@ -33,20 +33,14 @@ class MarketMaker:
         self.df = pd.DataFrame(self.sample_data, columns=["datetime", "price"])
         self.df["datetime"] = pd.to_datetime(self.df["datetime"])
 
-        # Evaluation metrics
-        returns = self.df["price"].pct_change().dropna().tolist()
-        self.sharpe = sharpe_ratio(returns, risk_free_return=0)
-        self.max_drawdown = maximum_drawdown(returns)
-
-        print(f" Sharpe Ratio: {self.sharpe:.2f}")
-        print(f" Maximum Drawdown: {self.max_drawdown:.2f}")
-
         self.total_trades = 0
         self.match_trades = 0
         self.pnl = 0
         self.pnl_over_time = []
         self.buy_orders = []
         self.sell_orders = []
+        self.asset = 1000 # 1,000 * 100000 = 100,000,000 VND
+        self.asset_over_time = []
 
         active_orders = []
         matched_orders = []
@@ -77,6 +71,8 @@ class MarketMaker:
                     _, m_type, m_price, m_size, _ = match
                     pnl = m_size * (price - m_price) if m_type == "BUY" else m_size * (m_price - price)
                     self.pnl += pnl
+                    self.asset = self.asset + pnl
+                self.asset_over_time.append((timestamp, self.asset))
                 matched_orders.clear()
 
                 # Place new buy/sell orders
@@ -92,6 +88,11 @@ class MarketMaker:
 
             self.pnl_over_time.append(self.pnl)
 
+        asset_df = pd.DataFrame(self.asset_over_time, columns=["timestamp", "asset"])
+        returns = asset_df["asset"].pct_change().dropna().tolist()
+        self.sharpe = sharpe_ratio(returns, risk_free_return=0)
+        self.max_drawdown = maximum_drawdown(returns)
+
         return self.get_results()
 
     def get_results(self):
@@ -106,10 +107,11 @@ class MarketMaker:
 
     def full_run(self):
         self.run()
+
         if self.df is None or self.df.empty:
             return
-        visualization(self.df, self.future_code, self.buy_orders, self.sell_orders, self.pnl_over_time)
-        report(self.total_trades, self.match_trades, self.pnl)
+        visualization(self.df, self.future_code, self.buy_orders, self.sell_orders, self.pnl_over_time, self.asset_over_time)
+        report(self.total_trades, self.match_trades, self.pnl, self.sharpe, self.max_drawdown, self.asset)
         return self.get_results()
 
 

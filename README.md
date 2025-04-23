@@ -32,6 +32,7 @@ We used **Optuna** get the best parameters for in-sample-data
 - For the **in-sample data**, the strategy produced a **positive PnL**.
 - However, for the **out-of-sample data**, the strategy still sometime result in a **negative PnL**.
 - The current parameters still cannot handle a rising or falling market well
+- We haven't applied taxes yet
 
 ## Related Work (or Background)
 - Prerequisite reading if the audience needs knowledge before exploring the project.
@@ -106,8 +107,10 @@ python -m src.backtest in
 ### In-sample Backtesting Result
 - Brieftly shown the result: table, image, etc.
 - Has link to the In-sample Backtesting Report
-![](images/in_sample_result.png)
+![](images/in_sample_results.png)
+![](images/in_sample_market.png)
 ![](images/in_sample_pnl.png)
+![](images/in_sample_asset_over_time.png)
 ## Optimization
 ```bash
 python -m src.optimize
@@ -141,8 +144,10 @@ python -m src.backtest out
 ### Out-of-sample Backtesting Reuslt
 - Brieftly shown the result: table, image, etc.
 - Has link to the Out-of-sample Backtesting Report
-![](images/out_sample_result.png)
+![](images/out_sample_results.png)
+![](images/out_sample_market.png)
 ![](images/out_sample_pnl.png)
+![](images/out_sample_asset_over_time.png)
 ## Paper Trading
 - Describe the Paper Trading step
 - Step 7 of the Nine-Step
