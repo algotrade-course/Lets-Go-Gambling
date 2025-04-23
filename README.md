@@ -105,8 +105,7 @@ python -m src.backtest in
 ### Data
 - It should be in `<DATA_PATH_ROOT>/in_sample_data.csv` after you process the data
 ### In-sample Backtesting Result
-- Brieftly shown the result: table, image, etc.
-- Has link to the In-sample Backtesting Report
+
 ![](images/in_sample_results.png)
 ![](images/in_sample_market.png)
 ![](images/in_sample_pnl.png)
@@ -142,8 +141,7 @@ python -m src.backtest out
 ### Data
 - It should be in `<DATA_PATH_ROOT>/out_sample_data.csv` after you process the data
 ### Out-of-sample Backtesting Reuslt
-- Brieftly shown the result: table, image, etc.
-- Has link to the Out-of-sample Backtesting Report
+
 ![](images/out_sample_results.png)
 ![](images/out_sample_market.png)
 ![](images/out_sample_pnl.png)
