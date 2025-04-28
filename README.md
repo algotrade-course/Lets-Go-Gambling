@@ -1,3 +1,5 @@
+![Static Badge](https://img.shields.io/badge/PLUTUS-55%25-%23BA8E23)
+
 # Plutus Project Template
 
 Template repository of a Plutus Project.
